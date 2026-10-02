@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Tarefas</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        .concluida {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        <h1 class="text-center mb-4"><i class="bi bi-check2-square"></i> Gerenciador de Tarefas</h1>
+
+        <!-- Alertas / Mensagens Flash -->
+        with get_flashed_messages(with_categories=true) as messages:
+            if messages:
+                for category, message in messages:
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                endif
+            endif
+        endwith
+
+        <!-- Formulário de Cadastro -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Cadastrar Nova Tarefa</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('adicionar') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required placeholder="Ex: Estudar Flask">
+                    </div>
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição (Opcional)</label>
+                        <textarea class="form-control" id="descricao" name="descricao" rows="2" placeholder="Ex: Ler a documentação e criar rotas"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-plus-lg"></i> Adicionar Tarefa</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Tarefas -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Lista de Tarefas</h5>
+            </div>
+            <div class="card-body">
+                {% if tarefas %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Título</th>
+                                    <th>Descrição</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tarefa in tarefas %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <span class="{% if tarefa.status == 'concluida' %}concluida{% endif %} fw-bold">
+                                            {{ tarefa.titulo }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="{% if tarefa.status == 'concluida' %}concluida{% endif %} text-muted">
+                                            {{ tarefa.descricao if tarefa.descricao else '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if tarefa.status == 'concluida' %}
+                                            <span class="badge bg-success">Concluída</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Pendente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <!-- Botão Alternar Status -->
+                                        <form action="{{ url_for('mudar_status', id=tarefa.id) }}" method="POST" class="d-inline">
+                                            {% if tarefa.status == 'pendente' %}
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marcar como Concluída">
+                                                    <i class="bi bi-check"></i> Concluir
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Marcar como Pendente">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Reabrir
+                                                </button>
+                                            {% endif %}
+                                        </form>
+
+                                        <!-- Botão Excluir -->
+                                        <form action="{{ url_for('excluir', id=tarefa.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta tarefa?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash"></i> Excluir
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted my-3">Nenhuma tarefa cadastrada no momento.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
